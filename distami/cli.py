@@ -45,14 +45,21 @@ def copy(param_array):
 
     if args.non_public:
         distami.make_ami_non_public()
-        distami.make_snapshot_non_public()
+        try:
+            distami.make_snapshot_non_public()
+        except Exception as e:
+            if 'marketplace product codes may not be made public' in e.message:
+                log.info(e.message)
+            else:
+                _fail(e.message)  
     else:
         ami_cp.make_ami_public()
         ami_cp.make_snapshot_public()
 
     if args.accounts:
-        ami_cp.share_ami_with_accounts(args.accounts)
-        ami_cp.share_snapshot_with_accounts(args.accounts)
+        account_ids = args.accounts.split(',')
+        ami_cp.share_ami_with_accounts(account_ids)
+        ami_cp.share_snapshot_with_accounts(account_ids)
     
 
 def run():
